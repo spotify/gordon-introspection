@@ -1,0 +1,29 @@
+dist: trusty
+sudo: false
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+language: python
+matrix:
+  include:
+  - python: '3.6'
+    env: TOXENV=py36
+  - python: '3.6'
+    env: TOXENV=docs
+  - python: '3.6'
+    env: TOXENV=manifest
+install:
+- pip install tox
+script:
+- tox
+notifications:
+  email: false
+deploy:
+  provider: pypi
+  user: spotify_alf
+  password:
+  on:
+    tags: true
+    branch: master
+    condition: $TOXENV = py36
+  distributions: sdist bdist_wheel
