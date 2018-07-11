@@ -64,6 +64,7 @@ def loggers(monkeypatch):
         'testing1': logging.getLogger('testing1'),
         'testing2': logging.getLogger('testing2'),
         'testing3': logging.PlaceHolder(logging.getLogger('placeholder')),
+        'root': logging.getLogger(''),
     }
     loggers['testing1'].setLevel('INFO')
     loggers['testing2'].setLevel('DEBUG')
@@ -73,8 +74,10 @@ def loggers(monkeypatch):
 
 
 @pytest.mark.parametrize('req,exp_status,exp_body', (
-    ('', 200, json.dumps({'testing1': 'INFO', 'testing2': 'DEBUG'})),
+    ('', 200, json.dumps(
+        {'root': 'WARNING', 'testing1': 'INFO', 'testing2': 'DEBUG'})),
     ('?logger=testing1', 200, json.dumps({'testing1': 'INFO'})),
+    ('?logger=""', 200, json.dumps({'root': 'WARNING'})),
     ('?logger=testing3', 400, '400: "testing3" is a PlaceHolder object.'),
     ('?logger=notalogger', 404, '404: Unknown logger: "notalogger".')
 ))
@@ -98,6 +101,8 @@ async def test_get_log_state(req, exp_status, exp_body, loggers,
         '404: Unknown logger: "notalogger".'),
     ('?logger=testing1&level=FUU', 404, '404: Unknown log level: "FUU".'),
     ('?logger=testing1&level=DEBUG', 204, ''),
+    ('?logger=""&level=DEBUG', 204, ''),
+    ('?logger=root&level=DEBUG', 204, ''),
 ))
 async def test_set_log_state(req, exp_status, exp_body, loggers,
                              aiohttp_client, loop, server_app):

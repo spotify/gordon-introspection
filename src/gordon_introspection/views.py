@@ -117,8 +117,14 @@ async def system(request):
 
 
 def _get_one_or_all_loggers(logger_name=None):
+    # logging.Logger.manager.loggerDict does not include root logger
+    root_logger = logging.getLogger('')
+
+    if logger_name in ('root', '""'):
+        return root_logger
+
+    valid_loggers = [root_logger]
     all_loggers = logging.Logger.manager.loggerDict
-    valid_loggers = {}
     for name, logger in all_loggers.items():
         if logger_name and logger_name == name:
             if isinstance(logger, logging.PlaceHolder):
@@ -127,7 +133,7 @@ def _get_one_or_all_loggers(logger_name=None):
             return logger
         if isinstance(logger, logging.PlaceHolder):
             continue
-        valid_loggers[name] = logger
+        valid_loggers.append(logger)
     return valid_loggers
 
 
@@ -160,16 +166,15 @@ async def get_log_state(request):
     # return all
     if logger_name is None:
         loggers = {}
-        for k, v in _get_one_or_all_loggers().items():
-            loggers[k] = logging.getLevelName(v.level)
+        for logr in _get_one_or_all_loggers():
+            loggers[logr.name] = logging.getLevelName(logr.level)
         return web.json_response(loggers)
 
     try:
         logger_name = logger_name.lower()
         target_logger = _get_one_or_all_loggers(logger_name)
-
         logger_level = logging.getLevelName(target_logger.level)
-        return web.json_response({logger_name: logger_level})
+        return web.json_response({target_logger.name: logger_level})
     except (KeyError, AttributeError):
         msg = f'Unknown logger: "{logger_name}".'
         raise web.HTTPNotFound(reason=msg)
