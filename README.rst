@@ -4,7 +4,7 @@
 
 .. desc-begin
 
-REST API plugin for service introspection into `Gordon`_. This plugin will expose endpoints for healthchecks (liveness and readyness), dynamic log level changes, and current event messages in flight, and allow for more features if needed (i.e. pull-based metrics).
+REST API plugin for service introspection into `Gordon`_. This plugin will expose endpoints for healthchecks (liveness and readiness), dynamic log level changes, and current event messages in flight, and allow for more features if needed (i.e. pull-based metrics).
 
 .. desc-end
 
