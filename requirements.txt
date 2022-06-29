@@ -1,4 +1,4 @@
-aiohttp==3.2.1
+aiohttp==3.7.4
 attrs==18.1.0
 gordon-dns==0.0.1.dev8
 setuptools==38.2.5
